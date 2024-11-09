@@ -70,143 +70,74 @@
     h1 tcpdump -n -i h1-eth0
 ```
 
-![imagem]
-
-```sh
-    h8 tcpdump -n -i h8-eth0
-```
-
-![imagem]
+![tcpdump_h1_h8](./imagens/tcpdump_h1_h8.png)
 
 ## Configuração do servidor e cliente TCP com iperf
 
 ```sh
     h1 iperf -s -p 5555 -i 1
 ```
-
-![imagem]
-
 ```sh
     h2 iperf -c 10.0.0.1 -p 5555 -i 1 -t 15
 ```
 
-![imagem]
+![iperf_30mb](./imagens/iperf_30mb.png)
 
 4. Repetindo o teste para diferentes valores de largura de banda:
 
 - largura de banda = 1 Mbps
 ```sh
     sudo mn --topo linear,8 --mac --link tc,bw=1
-```
-
-![imagem]
-
-```sh
     h1 iperf -s -p 5555 -i 1
-```
-
-![imagem]
-
-```sh
     h2 iperf -c 10.0.0.1 -p 5555 -i 1 -t 15
 ```
 
-![imagem]
+![iperf_1mb](./imagens/iperf_1mb.png)
 
 - largura de banda = 5 Mbps
 ```sh
     sudo mn --topo linear,8 --mac --link tc,bw=5
-```
-
-![imagem]
-
-```sh
     h1 iperf -s -p 5555 -i 1
-```
-
-![imagem]
-
-```sh
     h2 iperf -c 10.0.0.1 -p 5555 -i 1 -t 15
 ```
 
-![imagem]
+![iperf_5mb](./imagens/iperf_5mb.png)
 
 - largura de banda = 10 Mbps
 ```sh
     sudo mn --topo linear,8 --mac --link tc,bw=10
-```
-
-![imagem]
-
-```sh
     h1 iperf -s -p 5555 -i 1
-```
-
-![imagem]
-
-```sh
     h2 iperf -c 10.0.0.1 -p 5555 -i 1 -t 15
 ```
 
-![imagem]
+![iperf_10mb](./imagens/iperf_10mb.png)
 
 - largura de banda = 15 Mbps
 ```sh
     sudo mn --topo linear,8 --mac --link tc,bw=15
-```
-
-![imagem]
-
-```sh
     h1 iperf -s -p 5555 -i 1
-```
-
-![imagem]
-
-```sh
     h2 iperf -c 10.0.0.1 -p 5555 -i 1 -t 15
 ```
 
-![imagem]
+![iperf_15mb](./imagens/iperf_15mb.png)
 
 - largura de banda = 20 Mbps
 ```sh
     sudo mn --topo linear,8 --mac --link tc,bw=20
-```
-
-![imagem]
-
-```sh
     h1 iperf -s -p 5555 -i 1
-```
-
-![imagem]
-
-```sh
     h2 iperf -c 10.0.0.1 -p 5555 -i 1 -t 15
 ```
 
-![imagem]
+![iperf_20mb](./imagens/iperf_20mb.png)
 
 - largura de banda = 25 Mbps
 ```sh
     sudo mn --topo linear,8 --mac --link tc,bw=25
-```
-
-![imagem]
-
-```sh
     h1 iperf -s -p 5555 -i 1
-```
-
-![imagem]
-
-```sh
     h2 iperf -c 10.0.0.1 -p 5555 -i 1 -t 15
 ```
 
-![imagem]
+![iperf_25mb](./imagens/iperf_25mb.png)
 
 # Questão 2
 
