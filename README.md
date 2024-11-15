@@ -54,7 +54,7 @@
 
 ## Desenho ilustrativo da topologia
 
-![imagem]
+![desenho_ilustrativo_da_topologia](./imagens/desenho_ilustrativo_da_topologia.png)
 
 ## Testar Conectividade com Ping e tcpdump
 
