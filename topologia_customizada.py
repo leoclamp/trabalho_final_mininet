@@ -1,91 +1,179 @@
 from mininet.topo import Topo
-from mininet.net import Mininet
-from mininet.log import setLogLevel
-from mininet.cli import CLI
 
-class CustomTopo(Topo):
-    def build(self):
-        # Adicionar switches
-        s1 = self.addSwitch('s1')
-        s2 = self.addSwitch('s2')
-        s3 = self.addSwitch('s3')
-        s4 = self.addSwitch('s4')
-        s5 = self.addSwitch('s5')
-        s6 = self.addSwitch('s6')
-        s7 = self.addSwitch('s7')
+class MyTopo( Topo ):
+    "7 host, 7 switch"
 
-        # Adicionar hosts
-        h1 = self.addHost('h1')
-        h2 = self.addHost('h2')
-        h3 = self.addHost('h3')
-        h4 = self.addHost('h4')
-        h5 = self.addHost('h5')
-        h6 = self.addHost('h6')
-        h7 = self.addHost('h7')
+    def __init__( self ):
+        "Create custom topo."
 
-        # Conectar hosts aos switches
-        self.addLink(h1, s2)
-        self.addLink(h2, s6)
-        self.addLink(h3, s6)
-        self.addLink(h4, s5)
-        self.addLink(h5, s4)
-        self.addLink(h6, s3)
-        self.addLink(h7, s7)
+        # Initialize topology
+        Topo.__init__( self )
 
-        # Conectar switches entre si
-        self.addLink(s1, s2)
-        self.addLink(s2, s4)
-        self.addLink(s3, s4)
-        self.addLink(s3, s7)
-        self.addLink(s4, s5)
-        self.addLink(s5, s6)
+        # Add hosts and switches
+        h1 = self.addHost('h1', mac="00:00:00:00:00:01", ip="10.0.0.1/24")
+        h2 = self.addHost('h2', mac="00:00:00:00:00:02", ip="10.0.0.2/24")
+        h3 = self.addHost('h3', mac="00:00:00:00:00:03", ip="10.0.0.3/24")
+        h4 = self.addHost('h4', mac="00:00:00:00:00:04", ip="10.0.0.4/24")
+        h5 = self.addHost('h5', mac="00:00:00:00:00:05", ip="10.0.0.5/24")
+        h6 = self.addHost('h6', mac="00:00:00:00:00:06", ip="10.0.0.6/24")
+        h7 = self.addHost('h7', mac="00:00:00:00:00:07", ip="10.0.0.7/24")
 
-def run():
-    # Configurar o log
-    setLogLevel('info')
+        s1 = self.addSwitch( 's1' )
+        s2 = self.addSwitch( 's2' )
+        s3 = self.addSwitch( 's3' )
+        s4 = self.addSwitch( 's4' )
+        s5 = self.addSwitch( 's5' )
+        s6 = self.addSwitch( 's6' )
+        s7 = self.addSwitch( 's7' )
+        
 
-    # a) Criar topologia customizada
-    topo = CustomTopo()
-    net = Mininet(topo=topo, controller=None)
+        # Add links
+        self.addLink(s1,s2)
+        self.addLink(s2,h1)
+        self.addLink(s2,s4)
+        self.addLink(s4,h5)
+        self.addLink(s4,s3)
+        self.addLink(s3,h6)
+        self.addLink(s3,s7)
+        self.addLink(s7,h7)
+        self.addLink(s4,s5)
+        self.addLink(s5,h4)
+        self.addLink(s5,s6)
+        self.addLink(s6,h2)
+        self.addLink(s6,h3)
+        
+
+
+topos = { 'mytopo': ( lambda: MyTopo() ) }
+
+
+def setup_network():
+    topo = MyTopo()
+    # Inicializa a rede Mininet usando a topologia `topo`, com switches OVS e um controlador remoto.
+    net = Mininet(topo=topo, switch=OVSSwitch, controller=RemoteController)
     net.start()
 
-    # b) Inspecionar informações das interfaces
+    # B) Inspecionar interfaces e endereços MAC/IP
+    print("\nNetwork Interfaces and MAC/IP Addresses:")
+    # Imprime o nome do host, seu endereço MAC e IP.
     for host in net.hosts:
-        print(f"Informações do host {host.name}:")
-        print("IP:", host.IP())
-        print("MAC:", host.MAC())
-        print("Porta:", host.defaultIntf())
+        # Imprime o nome do host, seu endereço MAC e IP.
+        print(f"{host.name} - MAC: {host.MAC()} - IP: {host.IP()}")
 
-    # d) Fazer um ping para cada host e verificar a conectividade
-    print("Executando teste de ping geral entre todos os hosts...")
-    print(net.pingAll())
-
-    # e) Apagar regras anteriores
-    print("Apagando regras anteriores nos switches...")
+    # Loop através de cada switch na rede.
     for switch in net.switches:
-        switch.cmd('ovs-ofctl del-flows', switch.name)
+        print(f"\nSwitch {switch.name} interfaces:")
+        
+        # Executa o comando "ovs-ofctl show" para mostrar as interfaces do switch e detalhes de suas portas.
+        print(switch.cmd("ovs-ofctl show", switch.name))
+        
+        # Executa o comando "ovs-ofctl dump-flows" para exibir as regras de fluxo atuais do switch.
+        print(switch.cmd("ovs-ofctl dump-flows", switch.name))
 
-    # Adicionar regras baseadas em MAC para comunicação entre hosts
-    print("Configurando regras baseadas em endereços MAC...")
-    s2, s4, s6 = net.get('s2', 's4', 's6')
-    h1, h3, h5 = net.get('h1', 'h3', 'h5')
+    # D) Teste de ping entre alguns hosts
+    print("\nTesting connectivity with ping between selected hosts:")
+    # Realiza um teste de ping entre h1 e h2...
+    net.ping([net.get('h1'), net.get('h2')])
+    net.ping([net.get('h1'), net.get('h7')])
+    net.ping([net.get('h3'), net.get('h5')])
+    net.ping([net.get('h4'), net.get('h6')])
+    net.ping([net.get('h2'), net.get('h3')])
 
-    # Regras de exemplo para permitir comunicação baseada em MAC entre alguns hosts
-    print(s2.cmd(f'ovs-ofctl add-flow {s2} dl_src={h1.MAC()},dl_dst={h5.MAC()},actions=output:1'))
-    print(s4.cmd(f'ovs-ofctl add-flow {s4} dl_src={h5.MAC()},dl_dst={h3.MAC()},actions=output:2'))
-    print(s6.cmd(f'ovs-ofctl add-flow {s6} dl_src={h3.MAC()},dl_dst={h1.MAC()},actions=output:1'))
 
-    # e) Testar ping entre hosts para verificar regras de MAC
-    print("Executando teste de ping entre hosts com regras de MAC...")
-    print(net.ping([h1, h5]))
-    print(net.ping([h5, h3]))
-    print(net.ping([h3, h1]))
+    # E) Remover regras anteriores e criar regras baseadas em endereços MAC
+    print("\nDeleting previous rules and setting up MAC-based flows:")
+    # Loop através de cada switch na rede.
+    for switch in net.switches:
+        # Remove todas as regras de fluxo do switch usando "ovs-ofctl del-flows".
+        switch.cmd("ovs-ofctl del-flows", switch.name)
 
-    # Abrir CLI para exploração interativa
+    # Regras para comunicação baseada em MAC
+    # Adiciona uma regra no switch s6 para encaminhar pacotes de h3 para h2 na porta 4.
+    net.get('s6').cmd("ovs-ofctl add-flow s6 'dl_src=00:00:00:00:00:03,dl_dst=00:00:00:00:00:02,actions=output:4'")
+
+    # Adiciona uma regra no switch s6 para encaminhar pacotes de h2 para h3 na porta 1.
+    net.get('s6').cmd("ovs-ofctl add-flow s6 'dl_src=00:00:00:00:00:02,dl_dst=00:00:00:00:00:03,actions=output:1'")
+    
+    # Adiciona uma regra no switch s6 para encaminhar pacotes de h3 para h4 na porta 9.
+    net.get('s6').cmd("ovs-ofctl add-flow s6 'dl_src=00:00:00:00:00:03,dl_dst=00:00:00:00:00:04,actions=output:9'")
+    
+    # Adiciona uma regra no switch s5 para encaminhar pacotes de h4 para h3 na porta 1.
+    net.get('s5').cmd("ovs-ofctl add-flow s5 'dl_src=00:00:00:00:00:04,dl_dst=00:00:00:00:00:03,actions=output:1'")
+
+    # Adiciona uma regra no switch s6 para encaminhar pacotes de h3 para h5 na porta 12.
+    net.get('s6').cmd("ovs-ofctl add-flow s6 'dl_src=00:00:00:00:00:03,dl_dst=00:00:00:00:00:05,actions=output:12'")
+    
+    # Adiciona uma regra no switch s4 para encaminhar pacotes de h5 para h3 na porta 1.
+    net.get('s4').cmd("ovs-ofctl add-flow s4 'dl_src=00:00:00:00:00:05,dl_dst=00:00:00:00:00:03,actions=output:1'")
+
+    # Adiciona uma regra no switch s6 para encaminhar pacotes de h2 para h4 na porta 9.
+    net.get('s6').cmd("ovs-ofctl add-flow s6 'dl_src=00:00:00:00:00:02,dl_dst=00:00:00:00:00:04,actions=output:9'")
+    
+    # Adiciona uma regra no switch s4 para encaminhar pacotes de h4 para h2 na porta 4.
+    net.get('s5').cmd("ovs-ofctl add-flow s5 'dl_src=00:00:00:00:00:04,dl_dst=00:00:00:00:00:02,actions=output:4'")
+
+    # F) Testando conectividade após configuração de regras
+    print("\nTesting connectivity with ping after setting MAC-based flows:")
+
+
+    net.ping([net.get('h3'), net.get('h2')])
+    net.ping([net.get('h3'), net.get('h4')])
+    net.ping([net.get('h3'), net.get('h5')])
+    net.ping([net.get('h2'), net.get('h4')])
+
+
+    # Abre o CLI do Mininet para permitir a interação manual com a rede.
     CLI(net)
 
-    # Encerrar a rede
+    # Para a rede após o término da configuração e testes.
     net.stop()
 
+
 if __name__ == '__main__':
-    run()
+    # Define o nível de log para "info" para fornecer mais detalhes durante a execução.
+    setLogLevel('info')
+
+    # Executa a função `setup_network` para configurar e testar a rede.
+    setup_network()
+
+
+
+# Comandos no mininet:
+# A)
+# sudo mn --custom mytopo.py --topo mytopo --mac --controller=remote,ip=127.0.0.1,port=6633
+
+# B)
+# nodes
+# h1 ifconfig
+# h1 ping -c 4 h2
+# sh ovs-ofctl show s1 // Verifica as portas e conexão de um switch especifico
+# sh ovs-ofctl dump-flows s1 // Verificar as rotas dos switches
+
+# C) - Foto
+
+# D)
+# h1 ping -c 4 h2
+# h1 ping -c 4 h7
+# h3 ping -c 4 h5
+# h4 ping -c 4 h6
+# h2 ping -c 4 h3
+
+# E) Usar ovs-ofctl para cada switch, removendo as regras
+# sh ovs-ofctl del-flows s1
+# sh ovs-ofctl del-flows s2
+# sh ovs-ofctl del-flows s3
+# sh ovs-ofctl del-flows s4
+# sh ovs-ofctl del-flows s5
+# sh ovs-ofctl del-flows s6
+# sh ovs-ofctl del-flows s7
+
+# Criando novas regras:
+
+# F) Testando as regras
+# h1 ping -c 4 h5
+# h2 ping -c 4 h6
+
+
+
+
+
