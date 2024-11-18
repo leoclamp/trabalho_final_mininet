@@ -146,7 +146,7 @@
 
 ## Desenho ilustrativo da topologia
 
-![desenho_ilustrativo_da_topologia_2](./imagens/desenho_ilustrativo_da_topologia_2.png)
+![desenho_ilustrativo_da_topologia_2](./imagens/desenho_ilustrativo_da_topologia_2.jpeg)
 
 ### Colaboradores
 - Leonardo Matias
