@@ -54,7 +54,7 @@
 
 ## Desenho ilustrativo da topologia
 
-![desenho_ilustrativo_da_topologia](./imagens/desenho_ilustrativo_da_topologia.png)
+![desenho_ilustrativo_da_topologia_1](./imagens/desenho_ilustrativo_da_topologia_1.png)
 
 ## Testar Conectividade com Ping e tcpdump
 
@@ -143,6 +143,10 @@
 
 ### Arquivo:
   - `topologia_customizada`
+
+## Desenho ilustrativo da topologia
+
+![desenho_ilustrativo_da_topologia_2](./imagens/desenho_ilustrativo_da_topologia_2.png)
 
 ### Colaboradores
 - Leonardo Matias
